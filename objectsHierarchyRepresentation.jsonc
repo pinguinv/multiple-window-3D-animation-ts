@@ -1,0 +1,17 @@
+{
+    "renderer":{
+        "camera": 1,
+        "scene": {
+            "world": {
+                "animation": {
+                    "spheres": [
+                        {
+                            // sphere
+                            "tetrahedrons": []
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
