@@ -6,26 +6,27 @@ type BrowserWindowShape = {
 };
 
 const INSTANCES_KEY: string = "browserWindows";
+// Instance count is only for ID assigning purposes
 const INSTANCES_COUNT_KEY: string = "browserWindowsCount";
 
-type BrowserWindowData = {
+export type BrowserWindowData = {
     id: number;
     shape: BrowserWindowShape;
     metadata: string | undefined;
 };
 
-class BrowserWindowManager {
+export class BrowserWindowManager {
     private instanceData!: BrowserWindowData;
 
     private instances: BrowserWindowData[] = [];
     private instanceCount: number = 0;
 
     public instanceShapeChangedCallback: any | null = null;
-    public instancesCountChangedCallback: any | null = null;
+    public instancesChangedCallback: any | null = null;
 
     constructor() {
         addEventListener("storage", (event) => {
-            if (event.key == "browserWindows") {
+            if (event.key == INSTANCES_KEY) {
                 let newInstances: BrowserWindowData[] = JSON.parse(event.newValue!);
 
                 const instancesChanged: boolean =
@@ -34,8 +35,8 @@ class BrowserWindowManager {
                 this.instances = newInstances;
 
                 if (instancesChanged) {
-                    if (this.instancesCountChangedCallback != undefined)
-                        this.instancesCountChangedCallback();
+                    if (this.instancesChangedCallback != undefined)
+                        this.instancesChangedCallback();
                 }
             }
         });
@@ -151,9 +152,7 @@ class BrowserWindowManager {
         this.instanceShapeChangedCallback = cb;
     }
 
-    public setInstancesCountChangedCallback(cb: any) {
-        this.instancesCountChangedCallback = cb;
+    public setInstancesChangedCallback(cb: any) {
+        this.instancesChangedCallback = cb;
     }
 }
-
-export default BrowserWindowManager;

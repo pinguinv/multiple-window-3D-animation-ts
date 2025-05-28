@@ -1,19 +1,20 @@
 const INSTANCES_KEY = "browserWindows";
+// Instance count is only for ID assigning purposes
 const INSTANCES_COUNT_KEY = "browserWindowsCount";
-class BrowserWindowManager {
+export class BrowserWindowManager {
     constructor() {
         this.instances = [];
         this.instanceCount = 0;
         this.instanceShapeChangedCallback = null;
-        this.instancesCountChangedCallback = null;
+        this.instancesChangedCallback = null;
         addEventListener("storage", (event) => {
-            if (event.key == "browserWindows") {
+            if (event.key == INSTANCES_KEY) {
                 let newInstances = JSON.parse(event.newValue);
                 const instancesChanged = this.checkIfInstancesChanged(newInstances);
                 this.instances = newInstances;
                 if (instancesChanged) {
-                    if (this.instancesCountChangedCallback != undefined)
-                        this.instancesCountChangedCallback();
+                    if (this.instancesChangedCallback != undefined)
+                        this.instancesChangedCallback();
                 }
             }
         });
@@ -102,8 +103,7 @@ class BrowserWindowManager {
     setInstanceShapeChangedCallback(cb) {
         this.instanceShapeChangedCallback = cb;
     }
-    setInstancesCountChangedCallback(cb) {
-        this.instancesCountChangedCallback = cb;
+    setInstancesChangedCallback(cb) {
+        this.instancesChangedCallback = cb;
     }
 }
-export default BrowserWindowManager;
