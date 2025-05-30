@@ -1,21 +1,18 @@
 import * as three from "three";
 
-import { BrowserWindowManager, BrowserWindowData } from "./windowManager.ts";
-import { tetType, animationType, sphereType, windowScreenPositionType } from "./types.ts";
+import { BrowserWindowManager } from "./windowManager.ts";
+import { windowScreenPositionType, BrowserWindowData } from "./types.ts";
+import { MultiSphereAnimation } from "./multiSphereAnimation.ts";
 
 // Names clarification: tet is an abbreviation for tetrahedron
 
 // GLOBAL CONSTANTS
 const NEAR = -1000,
     FAR = 1000;
-const FIRST_SPHERE_RADIUS = 150;
-const RADIUS_DIFFERENCE = 50;
-const TETS_PER_SPHERE = 50;
-const SPHERES_PER_INSTANCE = 4;
-const TETS_MOVING_SPEED = 0.01;
 
 // GLOBAL VARIABLES
-let windowManager: BrowserWindowManager, browserWindows: BrowserWindowData[];
+let windowManager: BrowserWindowManager;
+
 let windowCurrentScreenPosition: windowScreenPositionType = { x: 0, y: 0 };
 
 let renderer: three.WebGLRenderer,
@@ -23,22 +20,21 @@ let renderer: three.WebGLRenderer,
     scene: three.Scene,
     world: three.Object3D;
 
-let animations: animationType[] = [];
+let browserWindows: BrowserWindowData[] = [];
+let animations: MultiSphereAnimation[] = [];
 
 function setupAndInit() {
-    setupWindowManager(); // second callback?
+    setupWindowManager();
 
-    setupRenderer(); // OK
+    setupRenderer();
 
-    setupSceneAndCamera(); // OK
+    setupSceneAndCamera();
 
-    updateWindowCurrentScreenPosition(); // OK
+    updateWindowCurrentScreenPosition();
 
-    setupAnimationsData(); // OK
+    updateAnimations();
 
-    fillTheWorldAccordingToData(); // OK
-
-    activateAnimation();
+    renderAnimations();
 
     window.addEventListener("resize", resizeCameraAndRenderer);
 }
@@ -47,24 +43,9 @@ function setupWindowManager(): void {
     windowManager = new BrowserWindowManager();
 
     windowManager.setInstanceShapeChangedCallback(updateWindowCurrentScreenPosition);
-    windowManager.setInstancesChangedCallback(updatetBrowserWindowsData);
-    // FIXME: update first animation after second window has appeared
+    windowManager.setInstancesChangedCallback(updateAnimations);
 
     windowManager.initInstance();
-}
-
-function updateWindowCurrentScreenPosition(): void {
-    windowCurrentScreenPosition = { x: window.screenLeft, y: window.screenTop };
-    adjustWorldPosition();
-}
-
-function updatetBrowserWindowsData() {
-    browserWindows = windowManager.getInstances();
-}
-
-function adjustWorldPosition(): void {
-    world.position.x = -windowCurrentScreenPosition.x;
-    world.position.y = -windowCurrentScreenPosition.y;
 }
 
 function setupRenderer(): void {
@@ -100,143 +81,8 @@ function setupSceneAndCamera(): void {
     // All animations will be added to `world`
     world = new three.Object3D();
     scene.add(world);
-}
 
-function setupAnimationsData(): void {
-    updatetBrowserWindowsData();
-
-    for (let i = 0; i < browserWindows.length; i++) {
-        animations.push(
-            generateAnimationData(FIRST_SPHERE_RADIUS + i * RADIUS_DIFFERENCE, i)
-        );
-    }
-}
-
-function generateAnimationData(
-    animationRadius: number,
-    colorIndex: number
-): animationType {
-    const animation: animationType = {
-        colorIndex: colorIndex,
-        spheres: [],
-    };
-
-    let tet: tetType;
-    let x, y, z, radiusAtY, sphere: sphereType;
-
-    let phi = Math.PI * (Math.sqrt(5) - 1); // golden angle in radians
-    let theta = 0;
-
-    for (let i = 0; i < SPHERES_PER_INSTANCE; i++) {
-        sphere = {
-            // passed radius + delta = +- 10%
-            r: animationRadius * (1 + 0.1 * (Math.random() * 2 - 1)),
-            tets: [],
-        };
-
-        // evenly distributing tets on a sphere using fibonacci sphere algorithm
-        for (let j = 0; j < TETS_PER_SPHERE; j++) {
-            // (from -sphere.r to sphere.r)
-            y = (1 - (i / TETS_PER_SPHERE) * 2) * sphere.r;
-
-            radiusAtY = Math.sqrt(sphere.r * sphere.r - y * y);
-
-            theta = phi * i;
-
-            x = radiusAtY * Math.cos(theta);
-            z = radiusAtY * Math.sin(theta);
-
-            tet = {
-                x: x,
-                y: y,
-                z: z,
-                flowDirection: 2 * Math.PI * Math.random(),
-                theta: theta,
-                phi: phi,
-            };
-
-            sphere.tets.push(tet);
-        }
-
-        animation.spheres.push(sphere);
-    }
-
-    return animation;
-}
-
-function fillTheWorldAccordingToData(): void {
-    for (let i = 0; i < animations.length; i++) {
-        const animationData: animationType = animations[i];
-        const animationObject: three.Object3D = new three.Object3D();
-
-        generateAnimationObject(animationObject, animationData);
-
-        world.add(animationObject);
-    }
-}
-
-function generateAnimationObject(
-    animationObject: three.Object3D,
-    animationData: animationType
-): void {
-    const tetrahedronGeometry = new three.TetrahedronGeometry(10);
-    const spheresData: sphereType[] = animationData.spheres;
-
-    for (let i = 0; i < spheresData.length; i++) {
-        const sphere: sphereType = spheresData[i];
-        const sphereAnchor: three.Object3D = new three.Object3D();
-
-        for (let j = 0; j < sphere.tets.length; j++) {
-            const tet: tetType = sphere.tets[i];
-
-            const tetrahedronMaterial = new three.MeshBasicMaterial({ wireframe: true });
-            tetrahedronMaterial.color.setHSL(0.1 * animationData.colorIndex, 1, 0.55);
-
-            const tetrahedronObject: three.Mesh = new three.Mesh(
-                tetrahedronGeometry,
-                tetrahedronMaterial
-            );
-
-            tetrahedronObject.position.x = tet.x;
-            tetrahedronObject.position.y = tet.y;
-            tetrahedronObject.position.z = tet.z;
-
-            sphereAnchor.add(tetrahedronObject);
-        }
-
-        sphereAnchor.name = "sphereAnchor" + i;
-        animationObject.add(sphereAnchor);
-    }
-}
-
-function activateAnimation() {
-    renderer.setAnimationLoop(animate);
-}
-
-// FIXME: update first animation after second window has appeared - probably something in code below
-
-function animate(time: number) {
-    moveAnimations();
-
-    windowManager.updateInstanceShape();
-
-    renderer.render(scene, camera);
-}
-
-function moveAnimations() {
-    adjustAnimationsPositions();
-    for (let i = 0; i < animations.length; i++) {
-        const animationData = animations[i];
-        const animationObject = world.children[i];
-
-        moveOneAnimation(animationData, animationObject);
-    }
-}
-
-function adjustAnimationsPositions() {
-    // console.log("adjustAnimationsPositions"); // check how many times is called and check if it works properly - if not, uncomment code below
-
-    // Cube for orientation
+    // Temporary cube for orientation
     let cube = new three.Mesh(
         new three.BoxGeometry(50, 50, 50),
         new three.MeshBasicMaterial({ color: 0xffffff, wireframe: true })
@@ -246,72 +92,82 @@ function adjustAnimationsPositions() {
     cube.position.y = 50;
 
     world.add(cube);
+}
 
-    // necessary for now bcs windows' shapes don't update properly
-    updatetBrowserWindowsData();
+function updateWindowCurrentScreenPosition(): void {
+    windowCurrentScreenPosition = { x: window.screenLeft, y: window.screenTop };
+    // Adjust world position
+    world.position.x = -windowCurrentScreenPosition.x;
+    world.position.y = -windowCurrentScreenPosition.y;
+}
+
+function updateAnimations() {
+    const newBrowserWindows: BrowserWindowData[] = windowManager.getInstances();
+
+    if (newBrowserWindows.length != browserWindows.length) {
+        browserWindows = newBrowserWindows;
+        onBrowserWindowCountChanged();
+    }
+}
+
+function onBrowserWindowCountChanged(): void {
+    animations.forEach((animation) => world.remove(animation.object));
+
+    animations = [];
 
     for (let i = 0; i < browserWindows.length; i++) {
+        animations.push(new MultiSphereAnimation(browserWindows[i].id));
+    }
+
+    animations.forEach((animation) => world.add(animation.object));
+}
+
+function renderAnimations() {
+    renderer.setAnimationLoop(render);
+}
+
+function render(time: number) {
+    windowManager.updateInstanceShape();
+
+    moveAnimations();
+
+    renderer.render(scene, camera);
+}
+
+function moveAnimations() {
+    adjustAnimationsPositions();
+    for (let i = 0; i < animations.length; i++) {
+        const animation = animations[i];
+
+        MultiSphereAnimation.moveAnimation(animation);
+    }
+}
+
+function adjustAnimationsPositions() {
+    for (let i = 0; i < browserWindows.length; i++) {
+        // TODO: position update needs to be done by browserWindowId, not index
         const window = browserWindows[i];
-        const animationObject = world.children[i];
+        const animation = findAnimationById(window.id);
+
+        if (animation === null) {
+            console.error("Couldn't find animation with BrowserWindowId: " + window.id);
+
+            return;
+        }
 
         // TODO: make position change smoother
-        animationObject.position.x = window.shape.x + window.shape.width / 2;
-        animationObject.position.y = window.shape.y + window.shape.height / 2;
+        animation.object.position.x = window.shape.x + window.shape.width / 2;
+        animation.object.position.y = window.shape.y + window.shape.height / 2;
     }
 }
 
-// TODO: add time to sync these animations
+function findAnimationById(browserWindowId: number): MultiSphereAnimation | null {
+    for (const animation of animations)
+        if (animation.browserWindowId == browserWindowId) return animation;
 
-function moveOneAnimation(animationData: animationType, animationObject: three.Object3D) {
-    let sphere: sphereType, sphereObj: three.Object3D;
-    let negative: boolean;
-
-    for (let i = 0; i < animationData.spheres.length; i++) {
-        sphere = animationData.spheres[i];
-        sphereObj = animationObject.children[i];
-
-        // move tets
-        moveTetsOfSphere(sphere, sphereObj);
-
-        negative = i % 2 == 1;
-
-        // rotate spheres
-        sphereObj.rotateX(0.01 * (i % 3) * (negative ? 1 : -1));
-        sphereObj.rotateY(0.01 * ((i + 1) % 3) * (negative ? -1 : 1));
-        sphereObj.rotateZ(0.01 * ((i + 2) % 3) * (negative ? 1 : -1));
-
-        // spheres position, maybe change it later so every tet has its own position calculated
-    }
+    return null;
 }
 
-function moveTetsOfSphere(sphere: sphereType, sphereObj: three.Object3D) {
-    let dTheta: number, dPhi: number;
-    let tet: tetType, tetObj: three.Object3D;
-    let negative: boolean;
-
-    for (let j = 0; j < sphere.tets.length; j++) {
-        tet = sphere.tets[j];
-        tetObj = sphereObj.children[j];
-
-        dTheta = (Math.cos(tet.flowDirection) * 2 - 1) * TETS_MOVING_SPEED;
-        dPhi = (Math.sin(tet.flowDirection) * 2 - 1) * TETS_MOVING_SPEED;
-
-        tet.theta += dTheta;
-        tet.phi += dPhi;
-
-        tetObj.position.x = sphere.r * Math.sin(tet.theta) * Math.cos(tet.phi);
-        tetObj.position.y = sphere.r * Math.sin(tet.theta) * Math.sin(tet.phi);
-        tetObj.position.z = sphere.r * Math.cos(tet.theta);
-
-        negative = j % 2 == 0;
-
-        tetObj.rotateX(0.01 * (j % 3) * (negative ? -1 : 1));
-        tetObj.rotateY(0.01 * ((j + 1) % 3) * (negative ? 1 : -1));
-        tetObj.rotateZ(0.01 * ((j + 2) % 3) * (negative ? -1 : 1));
-    }
-}
-
-// is passed as a callback to resize
 function resizeCameraAndRenderer() {
     // Ortographic camera
     const width = window.innerWidth,
@@ -327,7 +183,8 @@ function resizeCameraAndRenderer() {
 
     console.log("Camera and Renderer resized.");
 
-    updateWindowCurrentScreenPosition();
+    // unnecessary call
+    // updateWindowCurrentScreenPosition();
 }
 
 if (window.location.pathname === "/clear") {

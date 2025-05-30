@@ -1,19 +1,8 @@
-type BrowserWindowShape = {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-};
+import { BrowserWindowData, BrowserWindowShape } from "./types";
 
 const INSTANCES_KEY: string = "browserWindows";
 // Instance count is only for ID assigning purposes
 const INSTANCES_COUNT_KEY: string = "browserWindowsCount";
-
-export type BrowserWindowData = {
-    id: number;
-    shape: BrowserWindowShape;
-    metadata: string | undefined;
-};
 
 export class BrowserWindowManager {
     private instanceData!: BrowserWindowData;
@@ -92,16 +81,6 @@ export class BrowserWindowManager {
             currWindowShape.width != this.instanceData.shape.width ||
             currWindowShape.height != this.instanceData.shape.height;
 
-        // console.log(
-        //     "x: " +
-        //         (currWindowShape.x != this.instanceData.shape.x) +
-        //         "\ny: " +
-        //         (currWindowShape.y != this.instanceData.shape.y) +
-        //         "\nwidth: " +
-        //         (currWindowShape.width != this.instanceData.shape.width) +
-        //         " \nheight: " +
-        //         (currWindowShape.height != this.instanceData.shape.height)
-        // );
         if (shapeChanged) {
             const index = this.findInstanceIndexById(this.instanceData.id);
 
@@ -132,9 +111,6 @@ export class BrowserWindowManager {
     }
 
     private findInstanceIndexById(id: number): number {
-        // console.log("findInstanceIndexById ID: " + id);
-        // console.log(this.instances);
-
         for (let i = 0; i < this.instances.length; i++) {
             if (this.instances[i].id == id) return i;
         }

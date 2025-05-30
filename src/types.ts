@@ -1,3 +1,16 @@
+export type BrowserWindowShape = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+};
+
+export type BrowserWindowData = {
+    id: number;
+    shape: BrowserWindowShape;
+    metadata: string | undefined;
+};
+
 export type tetType = {
     x: number;
     y: number;
@@ -14,8 +27,7 @@ export type sphereType = {
     tets: tetType[];
 };
 
-export type animationType = {
-    colorIndex: number;
+export type animationDataType = {
     spheres: sphereType[];
 };
 

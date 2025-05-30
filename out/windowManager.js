@@ -55,16 +55,6 @@ export class BrowserWindowManager {
             currWindowShape.y != this.instanceData.shape.y ||
             currWindowShape.width != this.instanceData.shape.width ||
             currWindowShape.height != this.instanceData.shape.height;
-        // console.log(
-        //     "x: " +
-        //         (currWindowShape.x != this.instanceData.shape.x) +
-        //         "\ny: " +
-        //         (currWindowShape.y != this.instanceData.shape.y) +
-        //         "\nwidth: " +
-        //         (currWindowShape.width != this.instanceData.shape.width) +
-        //         " \nheight: " +
-        //         (currWindowShape.height != this.instanceData.shape.height)
-        // );
         if (shapeChanged) {
             const index = this.findInstanceIndexById(this.instanceData.id);
             this.instanceData.shape = currWindowShape;
@@ -88,8 +78,6 @@ export class BrowserWindowManager {
         return false;
     }
     findInstanceIndexById(id) {
-        // console.log("findInstanceIndexById ID: " + id);
-        // console.log(this.instances);
         for (let i = 0; i < this.instances.length; i++) {
             if (this.instances[i].id == id)
                 return i;
