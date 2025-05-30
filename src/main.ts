@@ -24,15 +24,13 @@ let browserWindows: BrowserWindowData[] = [];
 let animations: MultiSphereAnimation[] = [];
 
 function setupAndInit() {
-    setupWindowManager();
-
     setupRenderer();
 
     setupSceneAndCamera();
 
-    updateWindowCurrentScreenPosition();
+    setupWindowManager();
 
-    updateAnimations();
+    updateWindowCurrentScreenPosition();
 
     renderAnimations();
 
@@ -42,10 +40,13 @@ function setupAndInit() {
 function setupWindowManager(): void {
     windowManager = new BrowserWindowManager();
 
-    windowManager.setInstanceShapeChangedCallback(updateWindowCurrentScreenPosition);
-    windowManager.setInstancesChangedCallback(updateAnimations);
+    windowManager.setWindowShapeChangedCallback(updateWindowCurrentScreenPosition);
+    windowManager.setWindowCountChangedCallback(onBrowserWindowCountChanged);
 
-    windowManager.initInstance();
+    windowManager.initWindow();
+
+    // initially call, afterwards it will be called as window count changed callback
+    onBrowserWindowCountChanged();
 }
 
 function setupRenderer(): void {
@@ -81,36 +82,12 @@ function setupSceneAndCamera(): void {
     // All animations will be added to `world`
     world = new three.Object3D();
     scene.add(world);
-
-    // Temporary cube for orientation
-    let cube = new three.Mesh(
-        new three.BoxGeometry(50, 50, 50),
-        new three.MeshBasicMaterial({ color: 0xffffff, wireframe: true })
-    );
-
-    cube.position.x = 50;
-    cube.position.y = 50;
-
-    world.add(cube);
-}
-
-function updateWindowCurrentScreenPosition(): void {
-    windowCurrentScreenPosition = { x: window.screenLeft, y: window.screenTop };
-    // Adjust world position
-    world.position.x = -windowCurrentScreenPosition.x;
-    world.position.y = -windowCurrentScreenPosition.y;
-}
-
-function updateAnimations() {
-    const newBrowserWindows: BrowserWindowData[] = windowManager.getInstances();
-
-    if (newBrowserWindows.length != browserWindows.length) {
-        browserWindows = newBrowserWindows;
-        onBrowserWindowCountChanged();
-    }
 }
 
 function onBrowserWindowCountChanged(): void {
+    // update browser windows and create/update animations objects
+    browserWindows = windowManager.getWindows();
+
     animations.forEach((animation) => world.remove(animation.object));
 
     animations = [];
@@ -127,45 +104,39 @@ function renderAnimations() {
 }
 
 function render(time: number) {
-    windowManager.updateInstanceShape();
+    windowManager.updateWindowShape();
 
-    moveAnimations();
+    moveAnimationsAndUpdatePositions(time);
 
     renderer.render(scene, camera);
 }
 
-function moveAnimations() {
-    adjustAnimationsPositions();
+function moveAnimationsAndUpdatePositions(time: number) {
+    // Adjust world position
+    world.position.x = -windowCurrentScreenPosition.x;
+    world.position.y = -windowCurrentScreenPosition.y;
+
+    browserWindows = windowManager.getWindows();
+
     for (let i = 0; i < animations.length; i++) {
         const animation = animations[i];
-
-        MultiSphereAnimation.moveAnimation(animation);
-    }
-}
-
-function adjustAnimationsPositions() {
-    for (let i = 0; i < browserWindows.length; i++) {
-        // TODO: position update needs to be done by browserWindowId, not index
-        const window = browserWindows[i];
-        const animation = findAnimationById(window.id);
-
-        if (animation === null) {
-            console.error("Couldn't find animation with BrowserWindowId: " + window.id);
-
-            return;
-        }
+        const browserWindowIndex = windowManager.findWindowIndexById(
+            animation.browserWindowId
+        );
+        const browserWindow = browserWindows[browserWindowIndex];
 
         // TODO: make position change smoother
-        animation.object.position.x = window.shape.x + window.shape.width / 2;
-        animation.object.position.y = window.shape.y + window.shape.height / 2;
+        animation.object.position.x =
+            browserWindow.shape.x + browserWindow.shape.width / 2;
+        animation.object.position.y =
+            browserWindow.shape.y + browserWindow.shape.height / 2;
+
+        MultiSphereAnimation.moveAnimation(animation, time);
     }
 }
 
-function findAnimationById(browserWindowId: number): MultiSphereAnimation | null {
-    for (const animation of animations)
-        if (animation.browserWindowId == browserWindowId) return animation;
-
-    return null;
+function updateWindowCurrentScreenPosition(): void {
+    windowCurrentScreenPosition = { x: window.screenLeft, y: window.screenTop };
 }
 
 function resizeCameraAndRenderer() {
@@ -180,11 +151,6 @@ function resizeCameraAndRenderer() {
     camera.updateProjectionMatrix();
 
     renderer.setSize(width, height);
-
-    console.log("Camera and Renderer resized.");
-
-    // unnecessary call
-    // updateWindowCurrentScreenPosition();
 }
 
 if (window.location.pathname === "/clear") {

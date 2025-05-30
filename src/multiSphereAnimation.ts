@@ -113,7 +113,7 @@ export class MultiSphereAnimation {
     }
 
     // TODO: add time (not as method parameter, just get current time) to sync these animations
-    public static moveAnimation(animation: MultiSphereAnimation) {
+    public static moveAnimation(animation: MultiSphereAnimation, time: number) {
         let sphere: sphereType, sphereObj: three.Object3D;
         let negative: boolean;
 

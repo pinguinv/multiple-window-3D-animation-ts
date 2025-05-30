@@ -64,7 +64,7 @@ export class MultiSphereAnimation {
         return animationObject;
     }
     // TODO: add time (not as method parameter, just get current time) to sync these animations
-    static moveAnimation(animation) {
+    static moveAnimation(animation, time) {
         let sphere, sphereObj;
         let negative;
         for (let i = 0; i < animation.spheresData.length; i++) {

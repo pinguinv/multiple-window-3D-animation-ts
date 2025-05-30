@@ -1,62 +1,61 @@
 import { BrowserWindowData, BrowserWindowShape } from "./types";
 
-const INSTANCES_KEY: string = "browserWindows";
-// Instance count is only for ID assigning purposes
-const INSTANCES_COUNT_KEY: string = "browserWindowsCount";
+const WINDOWS_KEY: string = "browserWindows";
+// WindowNextId is only for ID assigning purposes
+const NEXT_WINDOW_ID_KEY: string = "browserWindowsNextId";
 
 export class BrowserWindowManager {
-    private instanceData!: BrowserWindowData;
+    private windowData!: BrowserWindowData;
 
-    private instances: BrowserWindowData[] = [];
-    private instanceCount: number = 0;
+    private windows: BrowserWindowData[] = [];
+    private windowNextId: number = 0;
 
-    public instanceShapeChangedCallback: any | null = null;
-    public instancesChangedCallback: any | null = null;
+    public windowShapeChangedCallback: any | null = null;
+    public windowCountChangedCallback: any | null = null;
 
     constructor() {
+        // event listener for when localStorage is changed - FROM ANOTHER WINDOW ONLY!!!
         addEventListener("storage", (event) => {
-            if (event.key == INSTANCES_KEY) {
-                let newInstances: BrowserWindowData[] = JSON.parse(event.newValue!);
+            if (event.key == WINDOWS_KEY) {
+                const newWindows: BrowserWindowData[] = JSON.parse(event.newValue!);
 
-                const instancesChanged: boolean =
-                    this.checkIfInstancesChanged(newInstances);
+                const windowCountChanged = this.windows.length != newWindows.length;
 
-                this.instances = newInstances;
+                this.windows = newWindows;
 
-                if (instancesChanged) {
-                    if (this.instancesChangedCallback != undefined)
-                        this.instancesChangedCallback();
+                if (windowCountChanged) {
+                    if (this.windowCountChangedCallback != null)
+                        this.windowCountChangedCallback();
                 }
             }
         });
 
-        // Delete this instance before closing window
+        // Delete this window before closing actual window
         window.addEventListener("beforeunload", (event) => {
-            const index = this.findInstanceIndexById(this.instanceData.id);
-            this.instances.splice(index, 1);
-            this.instanceCount -= 1;
+            const index = this.findWindowIndexById(this.windowData.id);
+            this.windows.splice(index, 1);
+            this.windowNextId -= 1;
 
-            //
-            this.updateInstancesLocalStorage();
+            this.updateWindowsLocalStorage();
         });
     }
 
-    public initInstance(metadata?: string): void {
-        this.instances = JSON.parse(localStorage.getItem(INSTANCES_KEY) || "[]");
+    public initWindow(metadata?: string): void {
+        this.windows = JSON.parse(localStorage.getItem(WINDOWS_KEY) || "[]");
 
-        this.instanceCount = parseInt(
-            JSON.parse(localStorage.getItem(INSTANCES_COUNT_KEY) || "0")
+        this.windowNextId = parseInt(
+            JSON.parse(localStorage.getItem(NEXT_WINDOW_ID_KEY) || "0")
         );
 
-        this.instanceData = {
-            id: this.instanceCount++,
+        this.windowData = {
+            id: this.windowNextId++,
             shape: this.getBrowserWindowShape(),
             metadata: metadata,
         };
 
-        this.instances.push(this.instanceData);
+        this.windows.push(this.windowData);
 
-        this.updateInstancesLocalStorage();
+        this.updateWindowsLocalStorage();
     }
 
     public getBrowserWindowShape(): BrowserWindowShape {
@@ -68,67 +67,67 @@ export class BrowserWindowManager {
         };
     }
 
-    public logInstances() {
-        console.log(this.instances);
+    public logWindows() {
+        console.log(this.windows);
     }
 
-    public updateInstanceShape(): void {
+    public updateWindowShape(): void {
         const currWindowShape: BrowserWindowShape = this.getBrowserWindowShape();
 
-        const shapeChanged =
-            currWindowShape.x != this.instanceData.shape.x ||
-            currWindowShape.y != this.instanceData.shape.y ||
-            currWindowShape.width != this.instanceData.shape.width ||
-            currWindowShape.height != this.instanceData.shape.height;
+        const shapeChanged = !this.checkIfEqualShapes(
+            currWindowShape,
+            this.windowData.shape
+        );
 
         if (shapeChanged) {
-            const index = this.findInstanceIndexById(this.instanceData.id);
+            const index = this.findWindowIndexById(this.windowData.id);
 
-            this.instanceData.shape = currWindowShape;
-            this.instances[index] = this.instanceData;
+            this.windowData.shape = currWindowShape;
+            this.windows[index] = this.windowData;
 
-            if (this.instanceShapeChangedCallback != null)
-                this.instanceShapeChangedCallback();
+            if (this.windowShapeChangedCallback !== null)
+                this.windowShapeChangedCallback();
 
-            this.updateInstancesLocalStorage();
-
-            console.log("Shape and position updated");
+            this.updateWindowsLocalStorage();
         }
     }
 
-    private updateInstancesLocalStorage() {
-        localStorage.setItem(INSTANCES_KEY, JSON.stringify(this.instances));
-        localStorage.setItem(INSTANCES_COUNT_KEY, JSON.stringify(this.instanceCount));
+    private updateWindowsLocalStorage() {
+        localStorage.setItem(WINDOWS_KEY, JSON.stringify(this.windows));
+        localStorage.setItem(NEXT_WINDOW_ID_KEY, JSON.stringify(this.windowNextId));
     }
 
-    private checkIfInstancesChanged(newInstances: BrowserWindowData[]): boolean {
-        if (this.instances.length != newInstances.length) return true;
-
-        for (let i = 0; i < this.instances.length; i++)
-            if (this.instances[i].id != newInstances[i].id) return true;
-
-        return false;
+    private checkIfEqualShapes(
+        shape1: BrowserWindowShape,
+        shape2: BrowserWindowShape
+    ): boolean {
+        return (
+            shape1.x == shape2.x &&
+            shape1.y == shape2.y &&
+            shape1.width == shape2.width &&
+            shape1.height == shape2.height
+        );
     }
 
-    private findInstanceIndexById(id: number): number {
-        for (let i = 0; i < this.instances.length; i++) {
-            if (this.instances[i].id == id) return i;
+    public findWindowIndexById(id: number): number {
+        for (let i = 0; i < this.windows.length; i++) {
+            if (this.windows[i].id == id) return i;
         }
 
-        console.error("Instance index not found! Returning -1");
+        console.error("Window index not found! Returning -1");
 
         return -1;
     }
 
-    public getInstances() {
-        return this.instances;
+    public getWindows() {
+        return this.windows;
     }
 
-    public setInstanceShapeChangedCallback(cb: any) {
-        this.instanceShapeChangedCallback = cb;
+    public setWindowShapeChangedCallback(cb: any) {
+        this.windowShapeChangedCallback = cb;
     }
 
-    public setInstancesChangedCallback(cb: any) {
-        this.instancesChangedCallback = cb;
+    public setWindowCountChangedCallback(cb: any) {
+        this.windowCountChangedCallback = cb;
     }
 }
