@@ -14,8 +14,8 @@ export class MultiSphereAnimation {
         let theta = 0;
         for (let i = 0; i < this.SPHERES_PER_INSTANCE; i++) {
             sphere = {
-                // radius + (random delta = +- 10%)
-                r: animationRadius * (1 + 0.1 * (Math.random() * 2 - 1)),
+                // radius + 10% * i
+                r: animationRadius * (1 + 0.1 * i),
                 tets: [],
             };
             // evenly distributing tets on a sphere using fibonacci sphere algorithm
@@ -63,10 +63,11 @@ export class MultiSphereAnimation {
         }
         return animationObject;
     }
-    // TODO: add time (not as method parameter, just get current time) to sync these animations
-    static moveAnimation(animation, time) {
+    static moveAnimation(animation) {
         let sphere, sphereObj;
         let negative;
+        const time = new Date().getTime();
+        this.t = time / 1000;
         for (let i = 0; i < animation.spheresData.length; i++) {
             sphere = animation.spheresData[i];
             sphereObj = animation.object.children[i];
@@ -74,11 +75,13 @@ export class MultiSphereAnimation {
             MultiSphereAnimation.moveTetsOfSphere(sphere, sphereObj);
             negative = i % 2 == 1;
             // rotate spheres
-            sphereObj.rotateX(0.01 * (i % 3) * (negative ? 1 : -1));
-            sphereObj.rotateY(0.01 * ((i + 1) % 3) * (negative ? -1 : 1));
-            sphereObj.rotateZ(0.01 * ((i + 2) % 3) * (negative ? 1 : -1));
+            sphereObj.rotation.x = this.t * 0.01 * (i % 3) * (negative ? 1 : -1);
+            sphereObj.rotation.y = this.t * 0.01 * ((i + 1) % 3) * (negative ? -1 : 1);
+            sphereObj.rotation.z = this.t * 0.01 * ((i + 2) % 3) * (negative ? 1 : -1);
+            // sphereObj.rotateX(0.01 * (i % 3) * (negative ? 1 : -1));
+            // sphereObj.rotateY(0.01 * ((i + 1) % 3) * (negative ? -1 : 1));
+            // sphereObj.rotateZ(0.01 * ((i + 2) % 3) * (negative ? 1 : -1));
         }
-        // TODO: przydałoby się wrzucić tu też zmianę pozycji
     }
     static moveTetsOfSphere(sphere, sphereObj) {
         let dTheta, dPhi;
@@ -93,20 +96,31 @@ export class MultiSphereAnimation {
             dPhi =
                 (Math.sin(tet.flowDirection) * 2 - 1) *
                     MultiSphereAnimation.TETS_MOVING_SPEED;
+            // dTheta =
+            //     (Math.cos(tet.flowDirection) * 2 - 1) *
+            //     MultiSphereAnimation.TETS_MOVING_SPEED;
+            // dPhi =
+            //     (Math.sin(tet.flowDirection) * 2 - 1) *
+            //     MultiSphereAnimation.TETS_MOVING_SPEED;
             tet.theta += dTheta;
             tet.phi += dPhi;
+            // tet.theta += dTheta;
+            // tet.phi += dPhi;
             tetObj.position.x = sphere.r * Math.sin(tet.theta) * Math.cos(tet.phi);
             tetObj.position.y = sphere.r * Math.sin(tet.theta) * Math.sin(tet.phi);
             tetObj.position.z = sphere.r * Math.cos(tet.theta);
             negative = j % 2 == 0;
-            tetObj.rotateX(0.01 * (j % 3) * (negative ? -1 : 1));
-            tetObj.rotateY(0.01 * ((j + 1) % 3) * (negative ? 1 : -1));
-            tetObj.rotateZ(0.01 * ((j + 2) % 3) * (negative ? -1 : 1));
+            tetObj.rotation.x = this.t * (j % 3) * (negative ? -1 : 1);
+            tetObj.rotation.y = this.t * ((j + 1) % 3) * (negative ? 1 : -1);
+            tetObj.rotation.z = this.t * ((j + 2) % 3) * (negative ? -1 : 1);
         }
     }
 }
 MultiSphereAnimation.FIRST_ANIMATION_RADIUS = 150;
 MultiSphereAnimation.RADIUS_DIFFERENCE = 50;
+// public static TETS_PER_SPHERE = 4 as const;
+// public static SPHERES_PER_INSTANCE = 1 as const;
 MultiSphereAnimation.TETS_PER_SPHERE = 50;
 MultiSphereAnimation.SPHERES_PER_INSTANCE = 4;
 MultiSphereAnimation.TETS_MOVING_SPEED = 0.01;
+MultiSphereAnimation.t = 0;

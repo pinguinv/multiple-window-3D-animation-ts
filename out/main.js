@@ -60,12 +60,13 @@ function onBrowserWindowCountChanged() {
 function renderAnimations() {
     renderer.setAnimationLoop(render);
 }
-function render(time) {
+// It turns out that there is nothing passed to render()
+function render() {
     windowManager.updateWindowShape();
-    moveAnimationsAndUpdatePositions(time);
+    moveAnimationsAndUpdatePositions();
     renderer.render(scene, camera);
 }
-function moveAnimationsAndUpdatePositions(time) {
+function moveAnimationsAndUpdatePositions() {
     // Adjust world position
     world.position.x = -windowCurrentScreenPosition.x;
     world.position.y = -windowCurrentScreenPosition.y;
@@ -79,7 +80,7 @@ function moveAnimationsAndUpdatePositions(time) {
             browserWindow.shape.x + browserWindow.shape.width / 2;
         animation.object.position.y =
             browserWindow.shape.y + browserWindow.shape.height / 2;
-        MultiSphereAnimation.moveAnimation(animation, time);
+        MultiSphereAnimation.moveAnimation(animation);
     }
 }
 function updateWindowCurrentScreenPosition() {

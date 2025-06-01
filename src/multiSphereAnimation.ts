@@ -4,9 +4,14 @@ import { sphereType, tetType, BrowserWindowData, BrowserWindowShape } from "./ty
 export class MultiSphereAnimation {
     public static FIRST_ANIMATION_RADIUS = 150 as const;
     public static RADIUS_DIFFERENCE = 50 as const;
+    // public static TETS_PER_SPHERE = 4 as const;
+    // public static SPHERES_PER_INSTANCE = 1 as const;
     public static TETS_PER_SPHERE = 50 as const;
     public static SPHERES_PER_INSTANCE = 4 as const;
     public static TETS_MOVING_SPEED = 0.01 as const;
+
+    public static t: number = 0;
+    // public static t: number = 1;
 
     public browserWindowId: number;
     public spheresData: sphereType[];
@@ -39,8 +44,8 @@ export class MultiSphereAnimation {
 
         for (let i = 0; i < this.SPHERES_PER_INSTANCE; i++) {
             sphere = {
-                // radius + (random delta = +- 10%)
-                r: animationRadius * (1 + 0.1 * (Math.random() * 2 - 1)),
+                // radius + 10% * i
+                r: animationRadius * (1 + 0.1 * i),
                 tets: [],
             };
 
@@ -112,10 +117,12 @@ export class MultiSphereAnimation {
         return animationObject;
     }
 
-    // TODO: add time (not as method parameter, just get current time) to sync these animations
-    public static moveAnimation(animation: MultiSphereAnimation, time: number) {
+    public static moveAnimation(animation: MultiSphereAnimation) {
         let sphere: sphereType, sphereObj: three.Object3D;
         let negative: boolean;
+
+        const time = new Date().getTime();
+        this.t = time / 1000;
 
         for (let i = 0; i < animation.spheresData.length; i++) {
             sphere = animation.spheresData[i];
@@ -127,12 +134,14 @@ export class MultiSphereAnimation {
             negative = i % 2 == 1;
 
             // rotate spheres
-            sphereObj.rotateX(0.01 * (i % 3) * (negative ? 1 : -1));
-            sphereObj.rotateY(0.01 * ((i + 1) % 3) * (negative ? -1 : 1));
-            sphereObj.rotateZ(0.01 * ((i + 2) % 3) * (negative ? 1 : -1));
-        }
+            sphereObj.rotation.x = this.t * 0.01 * (i % 3) * (negative ? 1 : -1);
+            sphereObj.rotation.y = this.t * 0.01 * ((i + 1) % 3) * (negative ? -1 : 1);
+            sphereObj.rotation.z = this.t * 0.01 * ((i + 2) % 3) * (negative ? 1 : -1);
 
-        // TODO: przydałoby się wrzucić tu też zmianę pozycji
+            // sphereObj.rotateX(0.01 * (i % 3) * (negative ? 1 : -1));
+            // sphereObj.rotateY(0.01 * ((i + 1) % 3) * (negative ? -1 : 1));
+            // sphereObj.rotateZ(0.01 * ((i + 2) % 3) * (negative ? 1 : -1));
+        }
     }
 
     private static moveTetsOfSphere(sphere: sphereType, sphereObj: three.Object3D) {
@@ -150,9 +159,18 @@ export class MultiSphereAnimation {
             dPhi =
                 (Math.sin(tet.flowDirection) * 2 - 1) *
                 MultiSphereAnimation.TETS_MOVING_SPEED;
+            // dTheta =
+            //     (Math.cos(tet.flowDirection) * 2 - 1) *
+            //     MultiSphereAnimation.TETS_MOVING_SPEED;
+            // dPhi =
+            //     (Math.sin(tet.flowDirection) * 2 - 1) *
+            //     MultiSphereAnimation.TETS_MOVING_SPEED;
 
             tet.theta += dTheta;
             tet.phi += dPhi;
+
+            // tet.theta += dTheta;
+            // tet.phi += dPhi;
 
             tetObj.position.x = sphere.r * Math.sin(tet.theta) * Math.cos(tet.phi);
             tetObj.position.y = sphere.r * Math.sin(tet.theta) * Math.sin(tet.phi);
@@ -160,9 +178,9 @@ export class MultiSphereAnimation {
 
             negative = j % 2 == 0;
 
-            tetObj.rotateX(0.01 * (j % 3) * (negative ? -1 : 1));
-            tetObj.rotateY(0.01 * ((j + 1) % 3) * (negative ? 1 : -1));
-            tetObj.rotateZ(0.01 * ((j + 2) % 3) * (negative ? -1 : 1));
+            tetObj.rotation.x = this.t * (j % 3) * (negative ? -1 : 1);
+            tetObj.rotation.y = this.t * ((j + 1) % 3) * (negative ? 1 : -1);
+            tetObj.rotation.z = this.t * ((j + 2) % 3) * (negative ? -1 : 1);
         }
     }
 }
