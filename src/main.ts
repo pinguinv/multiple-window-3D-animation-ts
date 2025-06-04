@@ -155,6 +155,8 @@ function resizeCameraAndRenderer() {
 
 if (window.location.pathname === "/clear") {
     localStorage.clear();
+
+    window.location.pathname = "/";
 } else {
     setupAndInit();
 }
