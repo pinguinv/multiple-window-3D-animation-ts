@@ -15,11 +15,6 @@ export type tetType = {
     x: number;
     y: number;
     z: number;
-
-    flowDirection: number; // Radians
-
-    theta: number;
-    phi: number;
 };
 
 export type sphereType = {
@@ -27,8 +22,19 @@ export type sphereType = {
     tets: tetType[];
 };
 
-export type animationDataType = {
-    spheres: sphereType[];
+export type tetStorageType = {
+    flowDirection: number; // Radians
+    thetaBase: number;
+    phiBase: number;
+};
+
+export type sphereStorageType = {
+    tets: tetStorageType[];
+};
+
+export type animationDataStorageType = {
+    id: number;
+    spheres: sphereStorageType[];
 };
 
 export type windowScreenPositionType = { x: number; y: number };

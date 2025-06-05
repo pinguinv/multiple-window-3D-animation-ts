@@ -17,6 +17,7 @@ function setupAndInit() {
     updateWindowCurrentScreenPosition();
     renderAnimations();
     window.addEventListener("resize", resizeCameraAndRenderer);
+    saveStartTimeToLocalStorage();
 }
 function setupWindowManager() {
     windowManager = new BrowserWindowManager();
@@ -52,6 +53,7 @@ function onBrowserWindowCountChanged() {
     browserWindows = windowManager.getWindows();
     animations.forEach((animation) => world.remove(animation.object));
     animations = [];
+    MultiSphereAnimation.removeAllAnimationsDataFromLocalStorage();
     for (let i = 0; i < browserWindows.length; i++) {
         animations.push(new MultiSphereAnimation(browserWindows[i].id));
     }
@@ -63,10 +65,11 @@ function renderAnimations() {
 // It turns out that there is nothing passed to render()
 function render() {
     windowManager.updateWindowShape();
-    moveAnimationsAndUpdatePositions();
+    const time = getTimeDifference();
+    moveAnimationsAndUpdatePositions(time);
     renderer.render(scene, camera);
 }
-function moveAnimationsAndUpdatePositions() {
+function moveAnimationsAndUpdatePositions(time) {
     // Adjust world position
     world.position.x = -windowCurrentScreenPosition.x;
     world.position.y = -windowCurrentScreenPosition.y;
@@ -80,7 +83,7 @@ function moveAnimationsAndUpdatePositions() {
             browserWindow.shape.x + browserWindow.shape.width / 2;
         animation.object.position.y =
             browserWindow.shape.y + browserWindow.shape.height / 2;
-        MultiSphereAnimation.moveAnimation(animation);
+        MultiSphereAnimation.moveAnimation(animation, time);
     }
 }
 function updateWindowCurrentScreenPosition() {
@@ -95,6 +98,20 @@ function resizeCameraAndRenderer() {
     camera.bottom = height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
+}
+function saveStartTimeToLocalStorage() {
+    if (localStorage.getItem("startTime") !== null) {
+        return;
+    }
+    const time = new Date().getTime();
+    localStorage.setItem("startTime", JSON.stringify(time));
+}
+function getTimeDifference() {
+    const currentTime = new Date().getTime();
+    const startTime = JSON.parse(localStorage.getItem("startTime") || "0");
+    if (startTime == 0)
+        console.error("Could not get startTime");
+    return currentTime - startTime;
 }
 if (window.location.pathname === "/clear") {
     localStorage.clear();

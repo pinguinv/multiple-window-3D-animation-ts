@@ -35,6 +35,8 @@ function setupAndInit() {
     renderAnimations();
 
     window.addEventListener("resize", resizeCameraAndRenderer);
+
+    saveStartTimeToLocalStorage();
 }
 
 function setupWindowManager(): void {
@@ -91,6 +93,7 @@ function onBrowserWindowCountChanged(): void {
     animations.forEach((animation) => world.remove(animation.object));
 
     animations = [];
+    MultiSphereAnimation.removeAllAnimationsDataFromLocalStorage();
 
     for (let i = 0; i < browserWindows.length; i++) {
         animations.push(new MultiSphereAnimation(browserWindows[i].id));
@@ -107,12 +110,14 @@ function renderAnimations() {
 function render() {
     windowManager.updateWindowShape();
 
-    moveAnimationsAndUpdatePositions();
+    const time = getTimeDifference();
+
+    moveAnimationsAndUpdatePositions(time);
 
     renderer.render(scene, camera);
 }
 
-function moveAnimationsAndUpdatePositions() {
+function moveAnimationsAndUpdatePositions(time: number) {
     // Adjust world position
     world.position.x = -windowCurrentScreenPosition.x;
     world.position.y = -windowCurrentScreenPosition.y;
@@ -132,7 +137,7 @@ function moveAnimationsAndUpdatePositions() {
         animation.object.position.y =
             browserWindow.shape.y + browserWindow.shape.height / 2;
 
-        MultiSphereAnimation.moveAnimation(animation);
+        MultiSphereAnimation.moveAnimation(animation, time);
     }
 }
 
@@ -152,6 +157,26 @@ function resizeCameraAndRenderer() {
     camera.updateProjectionMatrix();
 
     renderer.setSize(width, height);
+}
+
+function saveStartTimeToLocalStorage(): void {
+    if (localStorage.getItem("startTime") !== null) {
+        return;
+    }
+
+    const time = new Date().getTime();
+
+    localStorage.setItem("startTime", JSON.stringify(time));
+}
+
+function getTimeDifference() {
+    const currentTime: number = new Date().getTime();
+
+    const startTime: number = JSON.parse(localStorage.getItem("startTime") || "0");
+
+    if (startTime == 0) console.error("Could not get startTime");
+
+    return currentTime - startTime;
 }
 
 if (window.location.pathname === "/clear") {
