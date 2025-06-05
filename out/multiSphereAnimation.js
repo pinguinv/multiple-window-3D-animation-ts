@@ -16,7 +16,6 @@ export class MultiSphereAnimation {
         let theta = 0;
         for (let i = 0; i < this.SPHERES_PER_INSTANCE; i++) {
             sphere = {
-                // radius + 10% * i
                 r: animationRadius + this.RADIUS_SPHERE_DIFFERENCE * i,
                 tets: [],
             };
@@ -25,7 +24,7 @@ export class MultiSphereAnimation {
             };
             // evenly distributing tets on a sphere using fibonacci sphere algorithm
             for (let j = 0; j < this.TETS_PER_SPHERE; j++) {
-                // (from -sphere.r to sphere.r)
+                // from -sphere.r to sphere.r
                 y = (1 - (j / this.TETS_PER_SPHERE) * 2) * sphere.r;
                 radiusAtY = Math.sqrt(sphere.r * sphere.r - y * y);
                 theta = phi * j;
@@ -124,11 +123,11 @@ export class MultiSphereAnimation {
         }
     }
     static getAnimationsDataFromLocalStorage() {
-        const animationsInStorage = JSON.parse(localStorage.getItem("animationsData") || "[]");
+        const animationsInStorage = JSON.parse(localStorage.getItem(this.ANIMATIONS_DATA_KEY) || "[]");
         return animationsInStorage;
     }
     static getAnimationDataFromLocalStorageById(id) {
-        const animationsInStorage = JSON.parse(localStorage.getItem("animationsData") || "[]");
+        const animationsInStorage = JSON.parse(localStorage.getItem(this.ANIMATIONS_DATA_KEY) || "[]");
         for (let i = 0; i < animationsInStorage.length; i++) {
             if (animationsInStorage[i].id === id)
                 return animationsInStorage[i];
@@ -139,10 +138,9 @@ export class MultiSphereAnimation {
         return animationsInStorage[0];
     }
     static pushAnimationDataToLocalStorage(animationData) {
-        // fetch animationsData from localStorage
         const animationsInStorage = this.getAnimationsDataFromLocalStorage();
         animationsInStorage.push(animationData);
-        localStorage.setItem("animationsData", JSON.stringify(animationsInStorage));
+        localStorage.setItem(this.ANIMATIONS_DATA_KEY, JSON.stringify(animationsInStorage));
     }
     static removeAnimationDataFromLocalStorageById(id) {
         const animationsInStorage = this.getAnimationsDataFromLocalStorage();
@@ -155,17 +153,16 @@ export class MultiSphereAnimation {
         }
         if (index !== -1)
             animationsInStorage.splice(index, 1);
-        localStorage.setItem("animationsData", JSON.stringify(animationsInStorage));
+        localStorage.setItem(this.ANIMATIONS_DATA_KEY, JSON.stringify(animationsInStorage));
     }
     static removeAllAnimationsDataFromLocalStorage() {
-        localStorage.setItem("animationsData", "[]");
+        localStorage.setItem(this.ANIMATIONS_DATA_KEY, "[]");
     }
 }
+MultiSphereAnimation.ANIMATIONS_DATA_KEY = "animationsData";
 MultiSphereAnimation.FIRST_ANIMATION_RADIUS = 150;
 MultiSphereAnimation.RADIUS_SPHERE_DIFFERENCE = 10;
 MultiSphereAnimation.RADIUS_ANIMATIONS_DIFFERENCE = 30;
-// public static TETS_PER_SPHERE = 1 as const;
-// public static SPHERES_PER_INSTANCE = 4 as const;
 MultiSphereAnimation.TETS_PER_SPHERE = 50;
 MultiSphereAnimation.SPHERES_PER_INSTANCE = 4;
 MultiSphereAnimation.TETS_MOVING_SPEED = 0.1;

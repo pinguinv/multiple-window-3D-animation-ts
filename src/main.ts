@@ -106,7 +106,6 @@ function renderAnimations() {
     renderer.setAnimationLoop(render);
 }
 
-// It turns out that there is nothing passed to render()
 function render() {
     windowManager.updateWindowShape();
 

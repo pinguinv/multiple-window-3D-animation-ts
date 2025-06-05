@@ -8,18 +8,17 @@ import {
 } from "./types";
 
 export class MultiSphereAnimation {
+    public static ANIMATIONS_DATA_KEY = "animationsData";
+
     public static FIRST_ANIMATION_RADIUS = 150 as const;
     public static RADIUS_SPHERE_DIFFERENCE = 10 as const;
     public static RADIUS_ANIMATIONS_DIFFERENCE = 30 as const;
 
-    // public static TETS_PER_SPHERE = 1 as const;
-    // public static SPHERES_PER_INSTANCE = 4 as const;
     public static TETS_PER_SPHERE = 50 as const;
     public static SPHERES_PER_INSTANCE = 4 as const;
     public static TETS_MOVING_SPEED = 0.1 as const;
 
     public static t: number = 0;
-    // public static t: number = 1;
 
     public browserWindowId: number;
     public spheresData: sphereType[];
@@ -60,7 +59,6 @@ export class MultiSphereAnimation {
 
         for (let i = 0; i < this.SPHERES_PER_INSTANCE; i++) {
             sphere = {
-                // radius + 10% * i
                 r: animationRadius + this.RADIUS_SPHERE_DIFFERENCE * i,
                 tets: [],
             };
@@ -71,7 +69,7 @@ export class MultiSphereAnimation {
 
             // evenly distributing tets on a sphere using fibonacci sphere algorithm
             for (let j = 0; j < this.TETS_PER_SPHERE; j++) {
-                // (from -sphere.r to sphere.r)
+                // from -sphere.r to sphere.r
                 y = (1 - (j / this.TETS_PER_SPHERE) * 2) * sphere.r;
 
                 radiusAtY = Math.sqrt(sphere.r * sphere.r - y * y);
@@ -219,7 +217,7 @@ export class MultiSphereAnimation {
 
     private static getAnimationsDataFromLocalStorage(): animationDataStorageType[] {
         const animationsInStorage: animationDataStorageType[] = JSON.parse(
-            localStorage.getItem("animationsData") || "[]"
+            localStorage.getItem(this.ANIMATIONS_DATA_KEY) || "[]"
         );
 
         return animationsInStorage;
@@ -229,7 +227,7 @@ export class MultiSphereAnimation {
         id: number
     ): animationDataStorageType {
         const animationsInStorage: animationDataStorageType[] = JSON.parse(
-            localStorage.getItem("animationsData") || "[]"
+            localStorage.getItem(this.ANIMATIONS_DATA_KEY) || "[]"
         );
 
         for (let i = 0; i < animationsInStorage.length; i++) {
@@ -248,13 +246,15 @@ export class MultiSphereAnimation {
     private static pushAnimationDataToLocalStorage(
         animationData: animationDataStorageType
     ): void {
-        // fetch animationsData from localStorage
         const animationsInStorage: animationDataStorageType[] =
             this.getAnimationsDataFromLocalStorage();
 
         animationsInStorage.push(animationData);
 
-        localStorage.setItem("animationsData", JSON.stringify(animationsInStorage));
+        localStorage.setItem(
+            this.ANIMATIONS_DATA_KEY,
+            JSON.stringify(animationsInStorage)
+        );
     }
 
     public static removeAnimationDataFromLocalStorageById(id: number): void {
@@ -271,10 +271,13 @@ export class MultiSphereAnimation {
 
         if (index !== -1) animationsInStorage.splice(index, 1);
 
-        localStorage.setItem("animationsData", JSON.stringify(animationsInStorage));
+        localStorage.setItem(
+            this.ANIMATIONS_DATA_KEY,
+            JSON.stringify(animationsInStorage)
+        );
     }
 
     public static removeAllAnimationsDataFromLocalStorage(): void {
-        localStorage.setItem("animationsData", "[]");
+        localStorage.setItem(this.ANIMATIONS_DATA_KEY, "[]");
     }
 }
