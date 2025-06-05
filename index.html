@@ -13,7 +13,14 @@
                 background-color: #200050;
             }
         </style>
-        <script src="out/three.min.js"></script>
+
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "../build/three.module.js"
+                }
+            }
+        </script>
     </head>
     <body>
         <script type="module" src="out/main.js"></script>

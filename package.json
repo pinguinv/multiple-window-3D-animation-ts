@@ -2,6 +2,8 @@
     "name": "multiple-window-spheres-animation",
     "version": "1.0.0",
     "scripts": {
+        "dev-parcel": "npx parcel ./index.html",
+        "dev": "npx nodemon ./out/server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
@@ -10,11 +12,18 @@
     "type": "module",
     "description": "",
     "devDependencies": {
+        "@types/connect-livereload": "^0.6.3",
+        "@types/express": "^5.0.2",
+        "@types/livereload": "^0.9.5",
         "@types/three": "^0.176.0",
-        "typescript": "^5.8.3",
-        "parcel": "^2.15.2"
+        "connect-livereload": "^0.6.1",
+        "livereload": "^0.9.3",
+        "nodemon": "^3.1.10",
+        "parcel": "^2.15.2",
+        "typescript": "^5.8.3"
     },
     "dependencies": {
+        "express": "^5.1.0",
         "three": "^0.176.0"
     }
 }
