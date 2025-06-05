@@ -20,14 +20,42 @@ Run this on some Live Server or something similar. Opening `index.html` file in 
 
 Before each start of the app, clear the local storage by going to `/clear` sub-path.  
 
-Maybe in the future I will make a small Express server that automatically goes to this path and then redirects to actual animation.
-
 ## Development
 
-To turn on real-time updating server run:
+To compile Typescript to JavaScript in watch mode run:
 
 `npx tsc -w`
 
-`npx parcel ./index.html`
+And now you have 2 options:
 
-(Both commands in separate terminals at once)
+* Run parcel so it bundles all the stuff:
+
+    `npm run dev-parcel`
+
+* Or run little express server so it automatically clears your browser's local storage (preventing bugs) and refreshes the page(s); Essentially like Parcel without animation bugs:
+
+    `npm run dev`
+
+(You need to run 2 commands in separate terminals at once: **1 & 2**, or **1 & 3**)
+
+### About little express server
+
+Little express server that:
+
+* clears browser's local storage on first page load after server restart
+* restarts on changes in app files
+* refreshes web page
+
+That means:
+This server works like Parcel but also clears local storage after each restart
+
+#### Why I needed it?
+
+I needed such server because making changes in code with more than 1 tab opened and without clearing local storage caused animation bugs.
+
+#### Additional info
+
+Server doesn't directly clear browser's local storage since it does not have
+acces to the `window` property, but it lets **main.ts** script do the thing.
+How? By initially (after server starts) redirecting to `/clear` sub-path.
+Then **main** script clears local storage and redirects back to `/` path.

@@ -1,4 +1,5 @@
-import { BrowserWindowData, BrowserWindowShape } from "./types";
+import { MultiSphereAnimation } from "./multiSphereAnimation.ts";
+import { BrowserWindowData, BrowserWindowShape } from "./types.ts";
 
 const WINDOWS_KEY: string = "browserWindows";
 // WindowNextId is only for ID assigning purposes
@@ -35,6 +36,10 @@ export class BrowserWindowManager {
             const index = this.findWindowIndexById(this.windowData.id);
             this.windows.splice(index, 1);
             this.windowNextId -= 1;
+
+            MultiSphereAnimation.removeAnimationDataFromLocalStorageById(
+                this.windowData.id
+            );
 
             this.updateWindowsLocalStorage();
         });

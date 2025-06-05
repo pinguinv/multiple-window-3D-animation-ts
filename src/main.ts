@@ -35,6 +35,8 @@ function setupAndInit() {
     renderAnimations();
 
     window.addEventListener("resize", resizeCameraAndRenderer);
+
+    saveStartTimeToLocalStorage();
 }
 
 function setupWindowManager(): void {
@@ -91,6 +93,7 @@ function onBrowserWindowCountChanged(): void {
     animations.forEach((animation) => world.remove(animation.object));
 
     animations = [];
+    MultiSphereAnimation.removeAllAnimationsDataFromLocalStorage();
 
     for (let i = 0; i < browserWindows.length; i++) {
         animations.push(new MultiSphereAnimation(browserWindows[i].id));
@@ -103,8 +106,10 @@ function renderAnimations() {
     renderer.setAnimationLoop(render);
 }
 
-function render(time: number) {
+function render() {
     windowManager.updateWindowShape();
+
+    const time = getTimeDifference();
 
     moveAnimationsAndUpdatePositions(time);
 
@@ -153,8 +158,30 @@ function resizeCameraAndRenderer() {
     renderer.setSize(width, height);
 }
 
+function saveStartTimeToLocalStorage(): void {
+    if (localStorage.getItem("startTime") !== null) {
+        return;
+    }
+
+    const time = new Date().getTime();
+
+    localStorage.setItem("startTime", JSON.stringify(time));
+}
+
+function getTimeDifference() {
+    const currentTime: number = new Date().getTime();
+
+    const startTime: number = JSON.parse(localStorage.getItem("startTime") || "0");
+
+    if (startTime == 0) console.error("Could not get startTime");
+
+    return currentTime - startTime;
+}
+
 if (window.location.pathname === "/clear") {
     localStorage.clear();
+
+    window.location.pathname = "/";
 } else {
     setupAndInit();
 }
