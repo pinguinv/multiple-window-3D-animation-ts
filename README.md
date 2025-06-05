@@ -1,8 +1,6 @@
 # Multiple-window-3d-sphere-animation
 
-## About
-
-Original plan was to rewrite [this multipleWindow3dScene](https://github.com/bgstaal/multipleWindow3dScene) project in TypeScript, but then I decided to make it a little more difficult by changing animation according to my idea.
+Original plan was to rewrite [this multipleWindow3dScene](https://github.com/bgstaal/multipleWindow3dScene) project in TypeScript, but then I decided to make it a little more difficult (for me) by changing animation according to my idea.
 
 So now it's an animation of spheres composed of small, rotating tetrahedrons. Each browser window has it's own sphere that follows the center of the window.
 
@@ -12,33 +10,65 @@ So now it's an animation of spheres composed of small, rotating tetrahedrons. Ea
 * [Parcel](https://parceljs.org/) - zero config build tool  
 * Standard Typescript Compiler
 
+## No setup, no dependencies installation, just run app
+
+Required node to run server tho :v
+
+```bash
+node ./build/serverProd.js
+```
+
+or
+
+```bash
+npm run app
+```
+
+## Project Setup
+
+Like every project that uses NPM, you have to install dependencies:
+
+```bash
+npm install
+```
+
 ## How to use it
 
-### Note: Currently, only the method described in [Development](#development) section works - will fix it someday I promise xd
+Use dedicated command to run already compiled app using prod server:  
+*Hint: Required dependencies installation*
 
-Run this on some Live Server or something similar. Opening `index.html` file in the browser probably won't work due to browsers' CORS policy.  
+```bash
+npm start
+```
 
-Before each start of the app, clear the local storage by going to `/clear` sub-path.  
+Opening `index.html` file in the browser probably won't work due to browsers' CORS policy.
 
 ## Development
 
 To compile Typescript to JavaScript in watch mode run:
 
-`npx tsc -w`
+```bash
+npx tsc -w
+```
 
 And now you have 2 options:
 
-* Run parcel so it bundles all the stuff:
+* Run parcel so it bundles all the stuff:  
+    *Hint: Before each (re)start of the app, clear the local storage by going to `/clear` sub-path.*
 
-    `npm run dev-parcel`
+    ```bash
+    npm run dev-parcel
+    ```
 
-* Or run little express server so it automatically clears your browser's local storage (preventing bugs) and refreshes the page(s); Essentially like Parcel without animation bugs:
+* Or run *little express dev server* so it automatically clears your browser's local storage (preventing bugs) and refreshes the page(s); Essentially like Parcel without animation bugs:
 
-    `npm run dev`
+    ```bash
+    npm run dev
+    ```
 
-(You need to run 2 commands in separate terminals at once: **1 & 2**, or **1 & 3**)
+*Hint: You need to run 2 commands in separate terminals at once: **1 & 2**, or **1 & 3***
 
-### About little express server
+## About little express server
 
 Little express server that:
 
@@ -49,13 +79,12 @@ Little express server that:
 That means:
 This server works like Parcel but also clears local storage after each restart
 
-#### Why I needed it?
+### Why I needed it?
 
 I needed such server because making changes in code with more than 1 tab opened and without clearing local storage caused animation bugs.
 
-#### Additional info
+### Additional info
 
-Server doesn't directly clear browser's local storage since it does not have
-acces to the `window` property, but it lets **main.ts** script do the thing.
+Server doesn't directly clear browser's local storage since it does not have acces to the `window` property. It lets **main.ts** script do the thing.
 How? By initially (after server starts) redirecting to `/clear` sub-path.
 Then **main** script clears local storage and redirects back to `/` path.
