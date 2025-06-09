@@ -1,10 +1,8 @@
 import * as three from "three";
 import { BrowserWindowManager } from "./windowManager.js";
 import { MultiSphereAnimation } from "./multiSphereAnimation.js";
-// Names clarification: tet is an abbreviation for tetrahedron
-// GLOBAL CONSTANTS
 const NEAR = -1000, FAR = 1000;
-// GLOBAL VARIABLES
+const FALLOFF = 0.05;
 let windowManager;
 let windowCurrentScreenPosition = { x: 0, y: 0 };
 let renderer, camera, scene, world;
@@ -15,6 +13,7 @@ function setupAndInit() {
     setupSceneAndCamera();
     setupWindowManager();
     updateWindowCurrentScreenPosition();
+    setInitialAnimationsPositions();
     renderAnimations();
     window.addEventListener("resize", resizeCameraAndRenderer);
     saveStartTimeToLocalStorage();
@@ -24,7 +23,6 @@ function setupWindowManager() {
     windowManager.setWindowShapeChangedCallback(updateWindowCurrentScreenPosition);
     windowManager.setWindowCountChangedCallback(onBrowserWindowCountChanged);
     windowManager.initWindow();
-    // initially call, afterwards it will be called as window count changed callback
     onBrowserWindowCountChanged();
 }
 function setupRenderer() {
@@ -36,20 +34,14 @@ function setupRenderer() {
     renderer.setPixelRatio(pixelRatio);
 }
 function setupSceneAndCamera() {
-    // coordinate system :
-    //  --> x
-    // |
-    // V y
     camera = new three.OrthographicCamera(0, window.innerWidth, 0, window.innerHeight, NEAR, FAR);
     camera.position.z = 50;
     scene = new three.Scene();
     scene.background = new three.Color().setHex(0x200050);
-    // All animations will be added to `world`
     world = new three.Object3D();
     scene.add(world);
 }
 function onBrowserWindowCountChanged() {
-    // update browser windows and create/update animations objects
     browserWindows = windowManager.getWindows();
     animations.forEach((animation) => world.remove(animation.object));
     animations = [];
@@ -69,7 +61,6 @@ function render() {
     renderer.render(scene, camera);
 }
 function moveAnimationsAndUpdatePositions(time) {
-    // Adjust world position
     world.position.x = -windowCurrentScreenPosition.x;
     world.position.y = -windowCurrentScreenPosition.y;
     browserWindows = windowManager.getWindows();
@@ -77,19 +68,30 @@ function moveAnimationsAndUpdatePositions(time) {
         const animation = animations[i];
         const browserWindowIndex = windowManager.findWindowIndexById(animation.browserWindowId);
         const browserWindow = browserWindows[browserWindowIndex];
-        // TODO: make position change smoother
-        animation.object.position.x =
-            browserWindow.shape.x + browserWindow.shape.width / 2;
-        animation.object.position.y =
-            browserWindow.shape.y + browserWindow.shape.height / 2;
+        animation.object.position.x = computeSmoothChangeOfCoord(animation.object.position.x, browserWindow.shape.x + browserWindow.shape.width / 2);
+        animation.object.position.y = computeSmoothChangeOfCoord(animation.object.position.y, browserWindow.shape.y + browserWindow.shape.height / 2);
         MultiSphereAnimation.moveAnimation(animation, time);
     }
+}
+function computeSmoothChangeOfCoord(currCoord, targetCoord) {
+    const newCoord = currCoord + (targetCoord - currCoord) * FALLOFF;
+    return newCoord;
 }
 function updateWindowCurrentScreenPosition() {
     windowCurrentScreenPosition = { x: window.screenLeft, y: window.screenTop };
 }
+function setInitialAnimationsPositions() {
+    for (let i = 0; i < animations.length; i++) {
+        const animation = animations[i];
+        const browserWindowIndex = windowManager.findWindowIndexById(animation.browserWindowId);
+        const browserWindow = browserWindows[browserWindowIndex];
+        animation.object.position.x =
+            browserWindow.shape.x + browserWindow.shape.width / 2;
+        animation.object.position.y =
+            browserWindow.shape.y + browserWindow.shape.height / 2;
+    }
+}
 function resizeCameraAndRenderer() {
-    // Ortographic camera
     const width = window.innerWidth, height = window.innerHeight;
     camera.left = 0;
     camera.right = width;

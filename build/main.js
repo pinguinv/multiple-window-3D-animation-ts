@@ -1,8 +1,8 @@
 import * as three from "three";
 import { BrowserWindowManager } from "./windowManager.js";
 import { MultiSphereAnimation } from "./multiSphereAnimation.js";
-const NEAR = -1000,
-    FAR = 1000;
+const NEAR = -1000, FAR = 1000;
+const FALLOFF = 0.05;
 let windowManager;
 let windowCurrentScreenPosition = { x: 0, y: 0 };
 let renderer, camera, scene, world;
@@ -13,6 +13,7 @@ function setupAndInit() {
     setupSceneAndCamera();
     setupWindowManager();
     updateWindowCurrentScreenPosition();
+    setInitialAnimationsPositions();
     renderAnimations();
     window.addEventListener("resize", resizeCameraAndRenderer);
     saveStartTimeToLocalStorage();
@@ -33,14 +34,7 @@ function setupRenderer() {
     renderer.setPixelRatio(pixelRatio);
 }
 function setupSceneAndCamera() {
-    camera = new three.OrthographicCamera(
-        0,
-        window.innerWidth,
-        0,
-        window.innerHeight,
-        NEAR,
-        FAR
-    );
+    camera = new three.OrthographicCamera(0, window.innerWidth, 0, window.innerHeight, NEAR, FAR);
     camera.position.z = 50;
     scene = new three.Scene();
     scene.background = new three.Color().setHex(0x200050);
@@ -72,23 +66,33 @@ function moveAnimationsAndUpdatePositions(time) {
     browserWindows = windowManager.getWindows();
     for (let i = 0; i < animations.length; i++) {
         const animation = animations[i];
-        const browserWindowIndex = windowManager.findWindowIndexById(
-            animation.browserWindowId
-        );
+        const browserWindowIndex = windowManager.findWindowIndexById(animation.browserWindowId);
+        const browserWindow = browserWindows[browserWindowIndex];
+        animation.object.position.x = computeSmoothChangeOfCoord(animation.object.position.x, browserWindow.shape.x + browserWindow.shape.width / 2);
+        animation.object.position.y = computeSmoothChangeOfCoord(animation.object.position.y, browserWindow.shape.y + browserWindow.shape.height / 2);
+        MultiSphereAnimation.moveAnimation(animation, time);
+    }
+}
+function computeSmoothChangeOfCoord(currCoord, targetCoord) {
+    const newCoord = currCoord + (targetCoord - currCoord) * FALLOFF;
+    return newCoord;
+}
+function updateWindowCurrentScreenPosition() {
+    windowCurrentScreenPosition = { x: window.screenLeft, y: window.screenTop };
+}
+function setInitialAnimationsPositions() {
+    for (let i = 0; i < animations.length; i++) {
+        const animation = animations[i];
+        const browserWindowIndex = windowManager.findWindowIndexById(animation.browserWindowId);
         const browserWindow = browserWindows[browserWindowIndex];
         animation.object.position.x =
             browserWindow.shape.x + browserWindow.shape.width / 2;
         animation.object.position.y =
             browserWindow.shape.y + browserWindow.shape.height / 2;
-        MultiSphereAnimation.moveAnimation(animation, time);
     }
 }
-function updateWindowCurrentScreenPosition() {
-    windowCurrentScreenPosition = { x: window.screenLeft, y: window.screenTop };
-}
 function resizeCameraAndRenderer() {
-    const width = window.innerWidth,
-        height = window.innerHeight;
+    const width = window.innerWidth, height = window.innerHeight;
     camera.left = 0;
     camera.right = width;
     camera.top = 0;
@@ -106,12 +110,14 @@ function saveStartTimeToLocalStorage() {
 function getTimeDifference() {
     const currentTime = new Date().getTime();
     const startTime = JSON.parse(localStorage.getItem("startTime") || "0");
-    if (startTime == 0) console.error("Could not get startTime");
+    if (startTime == 0)
+        console.error("Could not get startTime");
     return currentTime - startTime;
 }
 if (window.location.pathname === "/clear") {
     localStorage.clear();
     window.location.pathname = "/";
-} else {
+}
+else {
     setupAndInit();
 }

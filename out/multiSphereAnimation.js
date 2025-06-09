@@ -12,7 +12,7 @@ export class MultiSphereAnimation {
             browserWindowId * this.RADIUS_ANIMATIONS_DIFFERENCE;
         let tet, tetStorage;
         let x, y, z, flowDir, radiusAtY, sphere, sphereStorage;
-        let phi = Math.PI * (Math.sqrt(5) - 1); // golden angle in radians
+        let phi = Math.PI * (Math.sqrt(5) - 1);
         let theta = 0;
         for (let i = 0; i < this.SPHERES_PER_INSTANCE; i++) {
             sphere = {
@@ -22,9 +22,7 @@ export class MultiSphereAnimation {
             sphereStorage = {
                 tets: [],
             };
-            // evenly distributing tets on a sphere using fibonacci sphere algorithm
             for (let j = 0; j < this.TETS_PER_SPHERE; j++) {
-                // from -sphere.r to sphere.r
                 y = (1 - (j / this.TETS_PER_SPHERE) * 2) * sphere.r;
                 radiusAtY = Math.sqrt(sphere.r * sphere.r - y * y);
                 theta = phi * j;
@@ -86,10 +84,8 @@ export class MultiSphereAnimation {
             sphere = animation.spheresData[i];
             sphereStorage = animationStorage.spheres[i];
             sphereObj = animation.object.children[i];
-            // move tets
             MultiSphereAnimation.moveTetsOfSphere(sphere, sphereObj, sphereStorage);
             negative = i % 2 == 1;
-            // rotate spheres
             sphereObj.rotation.x = this.t * 0.02 * (i % 3) * (negative ? 1 : -1);
             sphereObj.rotation.y = this.t * 0.02 * ((i + 1) % 3) * (negative ? -1 : 1);
             sphereObj.rotation.z = this.t * 0.02 * ((i + 2) % 3) * (negative ? 1 : -1);

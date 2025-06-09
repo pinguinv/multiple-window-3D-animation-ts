@@ -1,14 +1,3 @@
-// Little express server that:
-// * clears browser's local storage on first page load after server restart
-// * restarts on changes in app files
-// * refreshes web page
-// That means:
-// This server works like parcel but also clears local storage after each restart
-// Additional info:
-// Server doesn't directly clear browser's local storage since it does not have
-// acces to the `window` property, but it lets `main.ts` script do the thing.
-// How? By initially (after server starts) redirecting to `/clear` sub-path.
-// Then main script clears local storage and redirects back to `/` path.
 import express from "express";
 import * as livereload from "livereload";
 import * as connectLivereload from "connect-livereload";

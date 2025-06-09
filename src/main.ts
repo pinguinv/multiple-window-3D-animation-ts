@@ -10,6 +10,8 @@ import { MultiSphereAnimation } from "./multiSphereAnimation.ts";
 const NEAR = -1000,
     FAR = 1000;
 
+const FALLOFF = 0.05;
+
 // GLOBAL VARIABLES
 let windowManager: BrowserWindowManager;
 
@@ -31,6 +33,8 @@ function setupAndInit() {
     setupWindowManager();
 
     updateWindowCurrentScreenPosition();
+
+    setInitialAnimationsPositions();
 
     renderAnimations();
 
@@ -130,18 +134,44 @@ function moveAnimationsAndUpdatePositions(time: number) {
         );
         const browserWindow = browserWindows[browserWindowIndex];
 
-        // TODO: make position change smoother
-        animation.object.position.x =
-            browserWindow.shape.x + browserWindow.shape.width / 2;
-        animation.object.position.y =
-            browserWindow.shape.y + browserWindow.shape.height / 2;
+        animation.object.position.x = computeSmoothChangeOfCoord(
+            animation.object.position.x,
+            browserWindow.shape.x + browserWindow.shape.width / 2
+        );
+
+        animation.object.position.y = computeSmoothChangeOfCoord(
+            animation.object.position.y,
+            browserWindow.shape.y + browserWindow.shape.height / 2
+        );
 
         MultiSphereAnimation.moveAnimation(animation, time);
     }
 }
 
+function computeSmoothChangeOfCoord(currCoord: number, targetCoord: number): number {
+    const newCoord = currCoord + (targetCoord - currCoord) * FALLOFF;
+
+    return newCoord;
+}
+
 function updateWindowCurrentScreenPosition(): void {
     windowCurrentScreenPosition = { x: window.screenLeft, y: window.screenTop };
+}
+
+function setInitialAnimationsPositions(): void {
+    for (let i = 0; i < animations.length; i++) {
+        const animation = animations[i];
+        const browserWindowIndex = windowManager.findWindowIndexById(
+            animation.browserWindowId
+        );
+        const browserWindow = browserWindows[browserWindowIndex];
+
+        animation.object.position.x =
+            browserWindow.shape.x + browserWindow.shape.width / 2;
+
+        animation.object.position.y =
+            browserWindow.shape.y + browserWindow.shape.height / 2;
+    }
 }
 
 function resizeCameraAndRenderer() {
