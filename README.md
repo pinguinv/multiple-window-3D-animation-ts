@@ -10,9 +10,11 @@ So now it's an animation of spheres composed of small, rotating tetrahedrons. Ea
 * [Parcel](https://parceljs.org/) - zero config build tool  
 * Standard Typescript Compiler
 
-## No setup, no dependencies installation, just run app
+## Run animation without any setup
 
-Required node to run server tho :v
+If you clone this repo, you can simply run this animation without installing any dependencies - there's build in `build` folder. Use one of the commands listed below.
+
+*Required node to run server tho :v*
 
 ```bash
 node ./build/serverProd.js

@@ -12,7 +12,7 @@
     "author": "Michał Mrózek",
     "license": "ISC",
     "type": "module",
-    "description": "",
+    "description": "Animation of spheres composed of small, rotating tetrahedrons. Each browser window has it's own sphere that follows the center of the window.",
     "devDependencies": {
         "@types/connect-livereload": "^0.6.3",
         "@types/express": "^5.0.2",
