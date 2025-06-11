@@ -26,6 +26,10 @@ Use dedicated command to run already compiled app using prod server:
 npm start
 ```
 
+### Bugs
+
+In case there are some bugs with animations (for example: sphere without it's own browser window, animation freezed) close all windows but 1 and click the round red button in top right corner. It will clear local storage and restart the app.
+
 Opening `index.html` file in the browser probably won't work due to browsers' CORS policy.
 
 ## Development

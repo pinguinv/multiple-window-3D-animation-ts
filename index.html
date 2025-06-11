@@ -12,6 +12,23 @@
             body {
                 background-color: #200050;
             }
+
+            #resetAppButton {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                border-radius: 10rem;
+                background-color: rgba(205, 0, 0, 0.5);
+                width: 0.5rem;
+                height: 0.5rem;
+                border: none;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            #resetAppButton:hover {
+                background-color: rgba(255, 47, 47, 0.6);
+            }
         </style>
 
         <script type="importmap">
@@ -25,6 +42,7 @@
         </script>
     </head>
     <body>
+        <button id="resetAppButton" title="Restart the app"></button>
         <script type="module" src="out/main.js"></script>
     </body>
 </html>

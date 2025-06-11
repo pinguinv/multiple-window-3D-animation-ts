@@ -41,6 +41,8 @@ function setupAndInit() {
     window.addEventListener("resize", resizeCameraAndRenderer);
 
     saveStartTimeToLocalStorage();
+
+    document.getElementById("resetAppButton")!.addEventListener("click", resetApp);
 }
 
 function setupWindowManager(): void {
@@ -206,6 +208,12 @@ function getTimeDifference() {
     if (startTime == 0) console.error("Could not get startTime");
 
     return currentTime - startTime;
+}
+
+function resetApp() {
+    localStorage.clear();
+
+    location.reload();
 }
 
 if (window.location.pathname === "/clear") {
