@@ -69,6 +69,12 @@ And now you have 2 options:
 
 *Hint: You need to run 2 commands in separate terminals at once: **1 & 2**, or **1 & 3***
 
+## Build using webpack
+
+```bash
+npm run build
+```
+
 ## About little express server
 
 Little express server that:
@@ -89,3 +95,7 @@ I needed such server because making changes in code with more than 1 tab opened 
 Server doesn't directly clear browser's local storage since it does not have acces to the `window` property. It lets **main.ts** script do the thing.
 How? By initially (after server starts) redirecting to `/clear` sub-path.
 Then **main** script clears local storage and redirects back to `/` path.
+
+## Deployment
+
+App is deployed on GitHub Pages from `resource-demanding-bloom-effect` branch using GitHub Actions. Workflow can be found in `.github/workflows/deploy.yml`.
