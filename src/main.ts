@@ -1,8 +1,8 @@
 import * as three from "three";
 
-import { BrowserWindowManager } from "./windowManager.ts";
-import { windowScreenPositionType, BrowserWindowData } from "./types.ts";
-import { MultiSphereAnimation } from "./multiSphereAnimation.ts";
+import { BrowserWindowManager } from "windowManager";
+import { windowScreenPositionType, BrowserWindowData } from "types";
+import { MultiSphereAnimation } from "multiSphereAnimation";
 
 // Names clarification: tet is an abbreviation for tetrahedron
 

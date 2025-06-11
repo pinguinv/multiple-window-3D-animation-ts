@@ -1,4 +1,4 @@
-import { MultiSphereAnimation } from "./multiSphereAnimation.js";
+import { MultiSphereAnimation } from "multiSphereAnimation";
 const WINDOWS_KEY = "browserWindows";
 const NEXT_WINDOW_ID_KEY = "browserWindowsNextId";
 export class BrowserWindowManager {

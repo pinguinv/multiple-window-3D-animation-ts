@@ -1,5 +1,5 @@
-import { MultiSphereAnimation } from "./multiSphereAnimation.ts";
-import { BrowserWindowData, BrowserWindowShape } from "./types.ts";
+import { MultiSphereAnimation } from "multiSphereAnimation";
+import { BrowserWindowData, BrowserWindowShape } from "types";
 
 const WINDOWS_KEY: string = "browserWindows";
 // WindowNextId is only for ID assigning purposes

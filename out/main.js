@@ -1,6 +1,6 @@
 import * as three from "three";
-import { BrowserWindowManager } from "./windowManager.js";
-import { MultiSphereAnimation } from "./multiSphereAnimation.js";
+import { BrowserWindowManager } from "windowManager";
+import { MultiSphereAnimation } from "multiSphereAnimation";
 const NEAR = -1000, FAR = 1000;
 const FALLOFF = 0.05;
 let windowManager;

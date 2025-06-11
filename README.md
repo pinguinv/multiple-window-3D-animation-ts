@@ -7,23 +7,7 @@ So now it's an animation of spheres composed of small, rotating tetrahedrons. Ea
 ## Tools used
 
 * Npm
-* [Parcel](https://parceljs.org/) - zero config build tool  
 * Standard Typescript Compiler
-
-## Run animation without any setup
-
-If you clone this repo, you can simply run this animation without installing any dependencies - there's build in `build` folder. Use one of the commands listed below.  
-*Note: Required node to run server tho :v*
-
-```bash
-node ./build/index.cjs
-```
-
-or
-
-```bash
-npm run app
-```
 
 ## Project Setup
 
@@ -52,22 +36,13 @@ To compile Typescript to JavaScript in watch mode run:
 npx tsc -w
 ```
 
-And now you have 2 options:
+Run *little express dev server*. It automatically clears your browser's local storage (preventing bugs) and refreshes the page(s):
 
-* Run parcel so it bundles all the stuff:  
-    *Hint: Before each (re)start of the app, clear the local storage by going to `/clear` sub-path.*
+```bash
+npm run dev
+```
 
-    ```bash
-    npm run dev-parcel
-    ```
-
-* Or run *little express dev server* so it automatically clears your browser's local storage (preventing bugs) and refreshes the page(s); Essentially like Parcel without animation bugs:
-
-    ```bash
-    npm run dev
-    ```
-
-*Hint: You need to run 2 commands in separate terminals at once: **1 & 2**, or **1 & 3***
+*Hint: You need to run 2 commands in separate terminals at once
 
 ## Build using webpack
 
