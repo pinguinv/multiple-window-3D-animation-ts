@@ -12,7 +12,8 @@
 // How? By initially (after server starts) redirecting to `/clear` sub-path.
 // Then main script clears local storage and redirects back to `/` path.
 
-import express, { Request, Response } from "express";
+import express from "express";
+import { Request, Response } from "express";
 import * as livereload from "livereload";
 import * as connectLivereload from "connect-livereload";
 import path, { dirname } from "path";

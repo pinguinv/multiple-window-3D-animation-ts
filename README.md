@@ -16,7 +16,7 @@ If you clone this repo, you can simply run this animation without installing any
 *Note: Required node to run server tho :v*
 
 ```bash
-node ./build/serverProd.js
+node ./build/index.cjs
 ```
 
 or
