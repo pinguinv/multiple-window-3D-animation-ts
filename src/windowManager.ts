@@ -72,8 +72,9 @@ export class BrowserWindowManager {
         };
     }
 
-    public logWindows() {
-        console.log(this.windows);
+    public onAppRestart() {
+        this.windowNextId = 1;
+        this.windows = [];
     }
 
     public updateWindowShape(): void {

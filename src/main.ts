@@ -213,6 +213,8 @@ function getTimeDifference() {
 function resetApp() {
     localStorage.clear();
 
+    windowManager.onAppRestart();
+
     location.reload();
 }
 
