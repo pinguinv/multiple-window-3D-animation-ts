@@ -36,6 +36,7 @@ liveReloadServer.server.once("connection", () => {
 app.use(connectLivereload.default());
 app.use("/out/", express.static(__dirname + "/out"));
 app.use("/build/", express.static(path.join(__dirname, "node_modules/three/build")));
+app.use("/jsm/", express.static(path.join(__dirname, "node_modules/three/examples/jsm")));
 
 let redirToClear: boolean = true;
 

@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.join(dirname(__filename), "../");
 app.use("/out/", express.static(__dirname + "/out"));
 app.use("/build/", express.static(path.join(__dirname, "node_modules/three/build")));
+app.use("/jsm/", express.static(path.join(__dirname, "node_modules/three/examples/jsm")));
 let redirToClear = true;
 app.get("/", (req, res) => {
     if (redirToClear) {
