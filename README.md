@@ -4,18 +4,26 @@ Original plan was to rewrite [this multipleWindow3dScene](https://github.com/bgs
 
 So now it's an animation of spheres composed of small, rotating tetrahedrons. Each browser window has it's own sphere that follows the center of the window.
 
-## Tools used
+## Prerequsites
 
 * Npm
 * Standard Typescript Compiler
 
 ## Project Setup
 
-Like every project that uses NPM, you have to install dependencies:
+1. Like every project that uses NPM, you have to install dependencies:
 
-```bash
-npm install
-```
+    ```bash
+    npm install
+    ```
+
+2. And then compile TypeScript files:  
+
+    ```bash
+    npx tsc
+    ```
+
+    *Note: It's neccessary because `npm start` command depends on compilation output.*
 
 ## How to use it
 
