@@ -1,5 +1,10 @@
 import * as three from "three";
 
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass";
+
 import { BrowserWindowManager } from "windowManager";
 import { windowScreenPositionType, BrowserWindowData } from "types";
 import { MultiSphereAnimation } from "multiSphereAnimation";
@@ -18,6 +23,7 @@ let windowManager: BrowserWindowManager;
 let windowCurrentScreenPosition: windowScreenPositionType = { x: 0, y: 0 };
 
 let renderer: three.WebGLRenderer,
+    bloomComposer: EffectComposer,
     camera: three.OrthographicCamera,
     scene: three.Scene,
     world: three.Object3D;
@@ -29,6 +35,8 @@ function setupAndInit() {
     setupRenderer();
 
     setupSceneAndCamera();
+
+    setupBloomComposer();
 
     setupWindowManager();
 
@@ -92,6 +100,23 @@ function setupSceneAndCamera(): void {
     scene.add(world);
 }
 
+function setupBloomComposer() {
+    const renderScene = new RenderPass(scene, camera);
+    bloomComposer = new EffectComposer(renderer);
+    bloomComposer.addPass(renderScene);
+
+    const bloomPass = new UnrealBloomPass(
+        new three.Vector2(window.innerWidth, window.innerHeight),
+        0.3,
+        0.1,
+        0.1
+    );
+    bloomComposer.addPass(bloomPass);
+
+    const outputPass = new OutputPass();
+    bloomComposer.addPass(outputPass);
+}
+
 function onBrowserWindowCountChanged(): void {
     // update browser windows and create/update animations objects
     browserWindows = windowManager.getWindows();
@@ -119,7 +144,7 @@ function render() {
 
     moveAnimationsAndUpdatePositions(time);
 
-    renderer.render(scene, camera);
+    bloomComposer.render();
 }
 
 function moveAnimationsAndUpdatePositions(time: number) {
@@ -188,6 +213,7 @@ function resizeCameraAndRenderer() {
     camera.updateProjectionMatrix();
 
     renderer.setSize(width, height);
+    bloomComposer.setSize(width, height);
 }
 
 function saveStartTimeToLocalStorage(): void {
